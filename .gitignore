@@ -2,3 +2,4 @@ target
 .classpath
 .cache
 .settings
+lift_proto*db

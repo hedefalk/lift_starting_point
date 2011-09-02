@@ -7,10 +7,9 @@ import _root_.net.liftweb.http.provider._
 import _root_.net.liftweb.sitemap._
 import _root_.net.liftweb.sitemap.Loc._
 import Helpers._
-import _root_.net.liftweb.mapper.{DB, ConnectionManager, Schemifier, DefaultConnectionIdentifier, StandardDBVendor}
-import _root_.java.sql.{Connection, DriverManager}
+import _root_.net.liftweb.mapper.{ DB, ConnectionManager, Schemifier, DefaultConnectionIdentifier, StandardDBVendor }
+import _root_.java.sql.{ Connection, DriverManager }
 import _root_.test.model._
-
 
 /**
  * A class that's instantiated early and run.  It allows the application
@@ -19,11 +18,11 @@ import _root_.test.model._
 class Boot {
   def boot {
     if (!DB.jndiJdbcConnAvailable_?) {
-      val vendor = 
-	new StandardDBVendor(Props.get("db.driver") openOr "org.h2.Driver",
-			     Props.get("db.url") openOr 
-			     "jdbc:h2:lift_proto.db;AUTO_SERVER=TRUE",
-			     Props.get("db.user"), Props.get("db.password"))
+      val vendor =
+        new StandardDBVendor(Props.get("db.driver") openOr "org.h2.Driver",
+          Props.get("db.url") openOr
+            "jdbc:h2:lift_proto.db;AUTO_SERVER=TRUE",
+          Props.get("db.user"), Props.get("db.password"))
 
       LiftRules.unloadHooks.append(vendor.closeAllConnections_! _)
 
@@ -32,14 +31,13 @@ class Boot {
 
     // where to search snippet
     LiftRules.addToPackages("test")
-    Schemifier.schemify(true, Schemifier.infoF _, User)
+    Schemifier.schemify(true, Schemifier.infoF _, User, SomeModel)
 
     // Build SiteMap
     def sitemap() = SiteMap(
-      Menu("Home") / "index" >> User.AddUserMenusAfter, // Simple menu form
-      // Menu with special Link
-      Menu(Loc("Static", Link(List("static"), true, "/static/index"), 
-	       "Static Content")))
+      Menu("Home") / "index" ::
+        Menu(Loc("Static", Link(List("static"), true, "/static/index"), "Static Content")) ::
+        SomeModel.menus: _*)
 
     LiftRules.setSiteMapFunc(() => User.sitemapMutator(sitemap()))
 
